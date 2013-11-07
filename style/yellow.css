@@ -1,0 +1,17 @@
+input[type=text], input[type=submit]:active, div.find a {
+  background-color: #e5b800;
+  color: #0a0600;
+}
+
+html, input[type=submit], div.find a:active {
+  color: #e5b800;
+  background-color: #0a0600;
+}
+
+a {
+  color: #ecc800;
+}
+
+a:hover {
+  color: #fcd800
+}
