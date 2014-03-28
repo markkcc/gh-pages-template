@@ -282,10 +282,14 @@ int main(int argc, char *argv[]) {
     remote.sin_port = htons(port);
 
     /* connection request */
+    //TCO TO UDP MODIFICATION
+    /*
     if (connect(sock_fd, (struct sockaddr*) &remote, sizeof(remote)) < 0){
       perror("connect()");
       exit(1);
     }
+    */
+    //END MODIFICATION
 
     net_fd = sock_fd;
     do_debug("CLIENT: Connected to server %s\n", inet_ntoa(remote.sin_addr));
@@ -308,18 +312,35 @@ int main(int argc, char *argv[]) {
       exit(1);
     }
     
+    //TCP TO UDP MODIFICATION
+    //OLD:
+    /*
     if (listen(sock_fd, 5) < 0){
       perror("listen()");
       exit(1);
-    }
+    }/*
     
     /* wait for connection request */
+    /*
     remotelen = sizeof(remote);
     memset(&remote, 0, remotelen);
     if ((net_fd = accept(sock_fd, (struct sockaddr*)&remote, &remotelen)) < 0){
       perror("accept()");
       exit(1);
     }
+    */
+    //END OLD. NEW:
+
+    /*
+    remotelen = sizeof(remote);
+    memset(&remote, 0, remotelen);
+    if (recvfrom(sock_fd, buffer, BUFSIZE, 0, clientAddrCast, &remotelen) < 0) {
+      perror("recvfrom()");
+      exit(1);
+    }
+    */
+
+    //END MODIFICATION
 
     do_debug("SERVER: Client connected from %s\n", inet_ntoa(remote.sin_addr));
   }
