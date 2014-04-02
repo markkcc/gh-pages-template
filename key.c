@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <ctype.h>
 #include <openssl/evp.h>
 
 #define MAX_PLAINTEXT_LENGTH 21
@@ -34,14 +35,22 @@ int main(int argc, char *arv[]) {
 
 	char word[MAX_WORD_LEN];
 	char first_letter = 'A';
+	int wordcount = 0;
 	printf("Trying words that start with the letter %c... ", first_letter);
 	int ret;
 
 	while(42) {
 
-		 ret = fscanf(fp, "%s", word);
+		 ret = fscanf(fp, "%16s", word);
 		 if(ret == EOF)
 		 	break;
+		 wordcount++;
+
+		 if(tolower(word[0]) != first_letter) {
+		 	first_letter = word[0];
+		 	printf("%c... ", first_letter);
+		 }
+
 
 		 //test
 		 printf("%s", word);
