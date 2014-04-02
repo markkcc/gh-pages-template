@@ -6,7 +6,7 @@
 #define MAX_PLAINTEXT_LENGTH 21
 #define MAX_WORD_LEN 16
 #define MAX_BUF_LEN 100
-#define IV_LEN 16;
+#define IV_LEN 16
 
 /*
  * MAKEFILE (tab before gcc):
@@ -52,7 +52,7 @@ int main(int argc, char *arv[]) {
 		 	break;
 		 wordcount++;
 
-		 //Encrypt the plaintext woth the word as the key and compare the ciphertexts
+		 //Encrypt the plaintext with the word as the key and compare the ciphertexts
 		 memset(temp_cipher, 0x00, MAX_BUF_LEN);
 		 AES_set_encrypt_key (word, 128, &aeskey);
 		 AES_cbc_encrypt (plaintext, temp_cipher, MAX_PLAINTEXT_LENGTH, &aeskey, IV, AES_ENCRYPT);
