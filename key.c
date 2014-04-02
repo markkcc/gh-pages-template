@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 #include <openssl/aes.h>
 
 #define MAX_PLAINTEXT_LENGTH 21
@@ -9,20 +8,20 @@
 #define MAX_BUF_LEN 100
 
 /*
-MAKEFILE:
-
-INC=/usr/local/ssl/include/
-LIB=/usr/local/ssl/lib/
-all:
-	gcc -I$(INC) -L$(LIB) -o enc yourcode.c -lcrypto -ldl
-*/
+ * MAKEFILE:
+ * 
+ * INC=/usr/local/ssl/include/
+ * LIB=/usr/local/ssl/lib/
+ * all:
+ * 	gcc -I$(INC) -L$(LIB) -o enc yourcode.c -lcrypto -ldl
+ */
 
 int main(int argc, char *arv[]) {
 	
-	char plaintext[MAX_PLAINTEXT_LENGTH];
-	char ciphertext[MAX_BUF_LEN];
-	char temp_cipher[MAX_BUF_LEN];
-	char IV[16] = {0};
+	unsigned char plaintext[MAX_PLAINTEXT_LENGTH];
+	unsigned char ciphertext[MAX_BUF_LEN];
+	unsigned char temp_cipher[MAX_BUF_LEN];
+	unsigned char IV[16] = {0};
 
 	FILE *fp = fopen("words.txt", "r");
 	if(fp == NULL) {
@@ -34,15 +33,13 @@ int main(int argc, char *arv[]) {
 	memset(plaintext, '\0', MAX_PLAINTEXT_LENGTH);
 
 	printf("Plaintext (total %d characters): ", MAX_PLAINTEXT_LENGTH);
-	scanf("%s", plaintext);
+	fgets(plaintext, MAX_PLAINTEXT_LENGTH, stdin);
 	printf("Ciphertext (in hex format): ");
-	scanf("%s", ciphertext);
+	fgets(ciphertext, MAX_BUF_LEN, stdin);
 
 	AES_KEY aeskey;
-	char word[MAX_WORD_LEN];
-	char first_letter = 'A';
+	unsigned char word[MAX_WORD_LEN];
 	int wordcount = 0;
-	printf("Trying words that start with the letter %c... ", first_letter);
 	int ret;
 
 	while(42) {
@@ -53,22 +50,24 @@ int main(int argc, char *arv[]) {
 		 	break;
 		 wordcount++;
 
-		 if(tolower(word[0]) != tolower(first_letter)) {
-		 	first_letter = word[0];
-		 	printf("%c... ", first_letter);
-		 }
-
-
 		 //Encrypt the plaintext woth the word as the key and compare the ciphertexts
 		 memset(temp_cipher, 0x00, MAX_BUF_LEN);
 		 AES_set_encrypt_key (word, 128, &aeskey);
 		 AES_cbc_encrypt (plaintext, temp_cipher, MAX_PLAINTEXT_LENGTH, &aeskey, IV, AES_ENCRYPT);
 
 		 if(strncmp(ciphertext, temp_cipher, MAX_BUF_LEN) == 0) {
-		 	printf("\nKey found! Key without quotes:\n\"%s\"", word);
+		 	printf("\nKey found after trying %d words!\nKey without quotes:\n\"%s\"", wordcount, word);
 		 	break;
 		 }
 	}
 
+	printf("\nReached end of word list, aborting.\n");
+
 
 }
+
+/*
+ * Sample input:
+ * Plaintext (total 21 characters): This is a top secret.
+ * Ciphertext (in hex format): 8d20e5056a8d24d0462ce74e4904c1b513e10d1df4a2ef2ad4540fae1ca0aaf9
+ */ 
