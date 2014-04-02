@@ -17,6 +17,19 @@
  * 		gcc -I$(INC) -L$(LIB) -o enc key.c -lcrypto -ldl
  */
 
+static void hex_print(const void* pv, size_t len) {
+
+	const unsigned char *p = (const unsigned char*)pv;
+	if (NULL == pv)
+		printf("NULL");
+	else {
+		size_t i = 0;
+		for(; i<len; ++i)
+			printf("%02X", *p++);
+	}
+	printf("\n");
+}
+
 int main(int argc, char *arv[]) {
 	
 	unsigned char plaintext[MAX_PLAINTEXT_LENGTH];
@@ -64,6 +77,7 @@ int main(int argc, char *arv[]) {
 	}
 
 	printf("\nReached end of word list, aborting.\n");
+	hex_print(temp_cipher, sizeof(temp_cipher));
 
 
 }
