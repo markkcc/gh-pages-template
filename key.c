@@ -6,14 +6,15 @@
 #define MAX_PLAINTEXT_LENGTH 21
 #define MAX_WORD_LEN 16
 #define MAX_BUF_LEN 100
+#define IV_LEN 16;
 
 /*
- * MAKEFILE:
+ * MAKEFILE (tab before gcc):
  * 
  * INC=/usr/local/ssl/include/
  * LIB=/usr/local/ssl/lib/
  * all:
- * 	gcc -I$(INC) -L$(LIB) -o enc yourcode.c -lcrypto -ldl
+ * 		gcc -I$(INC) -L$(LIB) -o enc key.c -lcrypto -ldl
  */
 
 int main(int argc, char *arv[]) {
@@ -21,7 +22,7 @@ int main(int argc, char *arv[]) {
 	unsigned char plaintext[MAX_PLAINTEXT_LENGTH];
 	unsigned char ciphertext[MAX_BUF_LEN];
 	unsigned char temp_cipher[MAX_BUF_LEN];
-	unsigned char IV[16] = {0};
+	unsigned char IV[IV_LEN];
 
 	FILE *fp = fopen("words.txt", "r");
 	if(fp == NULL) {
@@ -31,6 +32,7 @@ int main(int argc, char *arv[]) {
 
 	memset(ciphertext, 0x00, MAX_BUF_LEN);
 	memset(plaintext, '\0', MAX_PLAINTEXT_LENGTH);
+	memset(IV, 0, IV_LEN);
 
 	printf("Plaintext (total %d characters): ", MAX_PLAINTEXT_LENGTH);
 	fgets(plaintext, MAX_PLAINTEXT_LENGTH, stdin);
