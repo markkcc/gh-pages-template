@@ -30,42 +30,56 @@
 #define IV_LEN 16
 
 static unsigned char* hexdump(const unsigned char *s, int l) {
-    
-    char * strhex = (char *)malloc(l*sizeof(char));
+    l /= 4;
+    unsigned char * strhex = (unsigned char *)malloc(2*l*sizeof(unsigned char));
+    memset(strhex, '\0', 2*l);
     int n = 0;
+    int printed = 0;
     for( ; n < l; ++n) {
-        sprintf(strhex + strlen(strhex), "%02x", s[n]);
+        printed += sprintf(strhex + printed, "%02x", s[n]);
     }
-    sprintf(strhex + strlen(strhex), "\n");
-    return (char *)strhex;
+    //sprintf(strhex + printed, "\n");
+    //printf("%d ", printed);
+
+    return (unsigned char *)strhex;
 }
 
 int main(int argc, char *arv[]) {
     
-    unsigned char plaintext[MAX_PLAINTEXT_LENGTH];
-    unsigned char ciphertext[MAX_BUF_LEN];
+    /*unsigned char plaintext[MAX_PLAINTEXT_LENGTH];
+    unsigned char ciphertext[MAX_BUF_LEN];*/
     unsigned char temp_cipher[MAX_BUF_LEN];
-    unsigned char IV[] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ,0,0,0,0,0,0,0,0};
+    unsigned char IV[] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+
 
     FILE *fp = fopen("words.txt", "r");
     if(fp == NULL) {
         perror("Failed to open the dictionnary \"words.txt\".");
         return EXIT_FAILURE;
     }
+    /*
 
     memset(ciphertext, '\0', MAX_BUF_LEN);
     memset(plaintext, '\0', MAX_PLAINTEXT_LENGTH);
 
     printf("Plaintext (total %d characters): ", MAX_PLAINTEXT_LENGTH);
-    fgets(plaintext, 25, stdin);
+    fgets(plaintext, MAX_PLAINTEXT_LENGTH+3, stdin);
     printf("Ciphertext (in hex format): ");
-    fgets(ciphertext, MAX_BUF_LEN, stdin);
+    fgets(ciphertext, MAX_BUF_LEN, stdin); 
+    */
+
+    //Hardcoded for debugging
+    char ciphertext[] = "8d20e5056a8d24d0462ce74e4904c1b513e10d1df4a2ef2ad4540fae1ca0aaf9";
+    char plaintext[] = "This is a top secret.";
+
 
     printf("\nIV: ");
     int i = 0;
     for( ; i < 16; i++)
         printf("%d", IV[i]);
-    printf("\n%s", ciphertext);
+    printf("\nCiphertext:\n%s, %d", ciphertext, strlen(ciphertext));
+    printf("\nPlaintext: %s", plaintext);
+
 
     AES_KEY aeskey;
     unsigned char word[MAX_WORD_LEN];
@@ -76,7 +90,6 @@ int main(int argc, char *arv[]) {
     while(42) {
 
          memset(word, ' ', MAX_WORD_LEN);
-         //memset(temp_str, '\0', MAX_BUF_LEN); //if i memset, i get a segfault
          ret = fscanf(fp, "%16s", word);
          if(ret == EOF)
              break;
@@ -84,17 +97,20 @@ int main(int argc, char *arv[]) {
          
          //Encrypt the plaintext with the word as the key and compare the ciphertexts
          memset(temp_cipher, '\0', MAX_BUF_LEN);
-         AES_set_encrypt_key (word, 128, &aeskey);
-         AES_cbc_encrypt (plaintext, temp_cipher, MAX_PLAINTEXT_LENGTH, &aeskey, IV, AES_ENCRYPT);
-
-    temp_str = hexdump((unsigned char*)temp_cipher, strlen(temp_cipher));
+         AES_set_encrypt_key (word, MAX_BUF_LEN, &aeskey);
+         AES_cbc_encrypt (plaintext, temp_cipher, MAX_BUF_LEN, &aeskey, IV, AES_ENCRYPT);
+    
+        temp_str = hexdump(temp_cipher, MAX_BUF_LEN);
+    /*
 
         if(wordcount%3000 == 0) {
         //Just for debugging.
-            printf("\n%s", temp_str);
-        }
+            printf("temp:\n%s\n", temp_str);
+        }*/
 
-         if(strncmp(ciphertext, temp_str, strlen(ciphertext)) == 0) {
+         if(strncmp(ciphertext, temp_str, MAX_BUF_LEN) == 0) {
+
+
              printf("\nKey found after trying %d words!\nKey without quotes:\n\"%s\"", wordcount, word);
              break;
          }
