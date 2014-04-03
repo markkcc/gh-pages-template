@@ -29,7 +29,7 @@
 #define MAX_BUF_LEN 128
 #define IV_LEN 16
 
-static unsigned char* hexdump(FILE *f, const unsigned char *s, int l) {
+static unsigned char* hexdump(const unsigned char *s, int l) {
     
     char * strhex = (char *)malloc(l*sizeof(char));
     int n = 0;
@@ -45,8 +45,7 @@ int main(int argc, char *arv[]) {
     unsigned char plaintext[MAX_PLAINTEXT_LENGTH];
     unsigned char ciphertext[MAX_BUF_LEN];
     unsigned char temp_cipher[MAX_BUF_LEN];
-    //unsigned char IV[IV_LEN];
-    unsigned char IV[] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ,0,0,0,0,0,0,0,0,0,0,0};
+    unsigned char IV[] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ,0,0,0,0,0,0,0,0};
 
     FILE *fp = fopen("words.txt", "r");
     if(fp == NULL) {
@@ -56,46 +55,45 @@ int main(int argc, char *arv[]) {
 
     memset(ciphertext, '\0', MAX_BUF_LEN);
     memset(plaintext, '\0', MAX_PLAINTEXT_LENGTH);
-    //memset(IV, 0, IV_LEN);
 
     printf("Plaintext (total %d characters): ", MAX_PLAINTEXT_LENGTH);
     fgets(plaintext, 25, stdin);
     printf("Ciphertext (in hex format): ");
     fgets(ciphertext, MAX_BUF_LEN, stdin);
 
-    printf("%s", ciphertext);
-    printf("IV: ");
+    printf("\nIV: ");
     int i = 0;
     for( ; i < 16; i++)
         printf("%d", IV[i]);
-    printf("\n");
+    printf("\n%s", ciphertext);
 
     AES_KEY aeskey;
     unsigned char word[MAX_WORD_LEN];
     int wordcount = 0;
     int ret;
-    /*unsigned char temp_str[MAX_BUF_LEN]; */
-    unsigned char *temp_str;
+    unsigned char* temp_str;
 
     while(42) {
 
          memset(word, ' ', MAX_WORD_LEN);
-         memset(temp_str, '\0', MAX_BUF_LEN);
+         //memset(temp_str, '\0', MAX_BUF_LEN); //if i memset, i get a segfault
          ret = fscanf(fp, "%16s", word);
          if(ret == EOF)
              break;
          wordcount++;
-         printf(" %d", wordcount);
          
          //Encrypt the plaintext with the word as the key and compare the ciphertexts
          memset(temp_cipher, '\0', MAX_BUF_LEN);
          AES_set_encrypt_key (word, 128, &aeskey);
          AES_cbc_encrypt (plaintext, temp_cipher, MAX_PLAINTEXT_LENGTH, &aeskey, IV, AES_ENCRYPT);
 
+    temp_str = hexdump((unsigned char*)temp_cipher, strlen(temp_cipher));
+
         if(wordcount%3000 == 0) {
-            temp_str = hexdump(stdout, (unsigned char*)temp_cipher, strlen(temp_cipher));
-            printf("%s", temp_str);
+        //Just for debugging.
+            printf("\n%s", temp_str);
         }
+
          if(strncmp(ciphertext, temp_str, strlen(ciphertext)) == 0) {
              printf("\nKey found after trying %d words!\nKey without quotes:\n\"%s\"", wordcount, word);
              break;
