@@ -170,7 +170,7 @@
 	 free(cropped_dgst);
 	 free(temp_dgst);
 	 free(temp_msg);
-	 fclose(f);
+	 fclose(f); 
 
  }
 
