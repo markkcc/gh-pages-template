@@ -1,296 +1,93 @@
 
+
 <!DOCTYPE html>
+<html>
+<title>Muggle's Survival Guide</title>
 
-<html i18n-values="dir:textdirection">
-
+<!--  Based on https://highlightjs.org/
+    All supported highlight languages: 
+    http://highlightjs.readthedocs.io/en/latest/css-classes-reference.html
+-->
 <head>
-<meta charset="utf-8">
+<link rel="stylesheet" href="style.css">
+<script src="highlight.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+<link rel="stylesheet" href="code.css">
 
-<script>
-function addRow(name, url, isdir, size, date_modified) {
-  if (name == ".")
-    return;
-
-  var root = "" + document.location;
-  if (root.substr(-1) !== "/")
-    root += "/";
-
-  var table = document.getElementById("table");
-  var row = document.createElement("tr");
-  var file_cell = document.createElement("td");
-  var link = document.createElement("a");
-
-  link.className = isdir ? "icon dir" : "icon file";
-
-  if (name == "..") {
-    link.href = root + "..";
-    link.innerText = document.getElementById("parentDirText").innerText;
-    link.className = "icon up";
-    size = "";
-    date_modified = "";
-  } else {
-    if (isdir) {
-      name = name + "/";
-      url = url + "/";
-      size = "";
-    } else {
-      link.draggable = "true";
-      link.addEventListener("dragstart", onDragStart, false);
-    }
-    link.innerText = name;
-    link.href = root + url;
-  }
-  file_cell.appendChild(link);
-
-  row.appendChild(file_cell);
-  row.appendChild(createCell(size));
-  row.appendChild(createCell(date_modified));
-
-  table.appendChild(row);
-}
-
-function onDragStart(e) {
-  var el = e.srcElement;
-  var name = el.innerText.replace(":", "");
-  var download_url_data = "application/octet-stream:" + name + ":" + el.href;
-  e.dataTransfer.setData("DownloadURL", download_url_data);
-  e.dataTransfer.effectAllowed = "copy";
-}
-
-function createCell(text) {
-  var cell = document.createElement("td");
-  cell.setAttribute("class", "detailsColumn");
-  cell.innerText = text;
-  return cell;
-}
-
-function start(location) {
-  var header = document.getElementById("header");
-  header.innerText = header.innerText.replace("LOCATION", location);
-
-  document.getElementById("title").innerText = header.innerText;
-}
-
-function onListingParsingError() {
-  var box = document.getElementById("listingParsingErrorBox");
-  box.innerHTML = box.innerHTML.replace("LOCATION", encodeURI(document.location)
-      + "?raw");
-  box.style.display = "block";
-}
-</script>
-
-<style>
-
-  h1 {
-    border-bottom: 1px solid #c0c0c0;
-    margin-bottom: 10px;
-    padding-bottom: 10px;
-    white-space: nowrap;
-  }
-
-  table {
-    border-collapse: collapse;
-  }
-
-  tr.header {
-    font-weight: bold;
-  }
-
-  td.detailsColumn {
-    -webkit-padding-start: 2em;
-    text-align: end;
-    white-space: nowrap;
-  }
-
-  a.icon {
-    -webkit-padding-start: 1.5em;
-    text-decoration: none;
-  }
-
-  a.icon:hover {
-    text-decoration: underline;
-  }
-
-  a.file {
-    background : url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAABnRSTlMAAAAAAABupgeRAAABHUlEQVR42o2RMW7DIBiF3498iHRJD5JKHurL+CRVBp+i2T16tTynF2gO0KSb5ZrBBl4HHDBuK/WXACH4eO9/CAAAbdvijzLGNE1TVZXfZuHg6XCAQESAZXbOKaXO57eiKG6ft9PrKQIkCQqFoIiQFBGlFIB5nvM8t9aOX2Nd18oDzjnPgCDpn/BH4zh2XZdlWVmWiUK4IgCBoFMUz9eP6zRN75cLgEQhcmTQIbl72O0f9865qLAAsURAAgKBJKEtgLXWvyjLuFsThCSstb8rBCaAQhDYWgIZ7myM+TUBjDHrHlZcbMYYk34cN0YSLcgS+wL0fe9TXDMbY33fR2AYBvyQ8L0Gk8MwREBrTfKe4TpTzwhArXWi8HI84h/1DfwI5mhxJamFAAAAAElFTkSuQmCC ") left top no-repeat;
-  }
-
-  a.dir {
-    background : url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAd5JREFUeNqMU79rFUEQ/vbuodFEEkzAImBpkUabFP4ldpaJhZXYm/RiZWsv/hkWFglBUyTIgyAIIfgIRjHv3r39MePM7N3LcbxAFvZ2b2bn22/mm3XMjF+HL3YW7q28YSIw8mBKoBihhhgCsoORot9d3/ywg3YowMXwNde/PzGnk2vn6PitrT+/PGeNaecg4+qNY3D43vy16A5wDDd4Aqg/ngmrjl/GoN0U5V1QquHQG3q+TPDVhVwyBffcmQGJmSVfyZk7R3SngI4JKfwDJ2+05zIg8gbiereTZRHhJ5KCMOwDFLjhoBTn2g0ghagfKeIYJDPFyibJVBtTREwq60SpYvh5++PpwatHsxSm9QRLSQpEVSd7/TYJUb49TX7gztpjjEffnoVw66+Ytovs14Yp7HaKmUXeX9rKUoMoLNW3srqI5fWn8JejrVkK0QcrkFLOgS39yoKUQe292WJ1guUHG8K2o8K00oO1BTvXoW4yasclUTgZYJY9aFNfAThX5CZRmczAV52oAPoupHhWRIUUAOoyUIlYVaAa/VbLbyiZUiyFbjQFNwiZQSGl4IDy9sO5Wrty0QLKhdZPxmgGcDo8ejn+c/6eiK9poz15Kw7Dr/vN/z6W7q++091/AQYA5mZ8GYJ9K0AAAAAASUVORK5CYII= ") left top no-repeat;
-  }
-
-  a.up {
-    background : url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAmlJREFUeNpsU0toU0EUPfPysx/tTxuDH9SCWhUDooIbd7oRUUTMouqi2iIoCO6lceHWhegy4EJFinWjrlQUpVm0IIoFpVDEIthm0dpikpf3ZuZ6Z94nrXhhMjM3c8895977BBHB2PznK8WPtDgyWH5q77cPH8PpdXuhpQT4ifR9u5sfJb1bmw6VivahATDrxcRZ2njfoaMv+2j7mLDn93MPiNRMvGbL18L9IpF8h9/TN+EYkMffSiOXJ5+hkD+PdqcLpICWHOHc2CC+LEyA/K+cKQMnlQHJX8wqYG3MAJy88Wa4OLDvEqAEOpJd0LxHIMdHBziowSwVlF8D6QaicK01krw/JynwcKoEwZczewroTvZirlKJs5CqQ5CG8pb57FnJUA0LYCXMX5fibd+p8LWDDemcPZbzQyjvH+Ki1TlIciElA7ghwLKV4kRZstt2sANWRjYTAGzuP2hXZFpJ/GsxgGJ0ox1aoFWsDXyyxqCs26+ydmagFN/rRjymJ1898bzGzmQE0HCZpmk5A0RFIv8Pn0WYPsiu6t/Rsj6PauVTwffTSzGAGZhUG2F06hEc9ibS7OPMNp6ErYFlKavo7MkhmTqCxZ/jwzGA9Hx82H2BZSw1NTN9Gx8ycHkajU/7M+jInsDC7DiaEmo1bNl1AMr9ASFgqVu9MCTIzoGUimXVAnnaN0PdBBDCCYbEtMk6wkpQwIG0sn0PQIUF4GsTwLSIFKNqF6DVrQq+IWVrQDxAYQC/1SsYOI4pOxKZrfifiUSbDUisif7XlpGIPufXd/uvdvZm760M0no1FZcnrzUdjw7au3vu/BVgAFLXeuTxhTXVAAAAAElFTkSuQmCC ") left top no-repeat;
-  }
-
-  html[dir=rtl] a {
-    background-position-x: right;
-  }
-
-  #listingParsingErrorBox {
-    border: 1px solid black;
-    background: #fae691;
-    padding: 10px;
-    display: none;
-  }
-</style>
-
-<title id="title"></title>
-
+<div id="header">
+  <h1>The Muggle's Guide to Hacking &amp; Cyber Piracy</h1>
+  <br>
+  HOME | WIFI | SCRIPTS | BOOKS | ABOUT
+</div>
+Last updated: Feb.12.2017 at 7:48 PM
 </head>
 
 <body>
+<h2>TMUX</h2>
+tmux is a terminal multiplexer: A program that lets you split your terminal into multiple windows and work on several programs at the sime time, switching between them quickly using keybindings. tmux can be started with the following commands:
+<pre><code>tmux new -s basic -n window_name # Create a new session called basic and name the first window
+tmux new -s detached_session_name -d # Creates a session in the background
+tmux ls # List existing sessions already created
+tmux attach # Attach to the only existing session
+tmux attach -t session_name # Attach to a specific session
+tmux kill-session -t session_name # Kills a specific session</code></pre>
+The prefix command is used to differentiate between commands going to the running program, and commands intended to go to tmux itself. By default, the prefix command is:
+<pre><code>Ctrl-b</code></pre>
+Deault keybindings:
+<pre><code class="bash">Ctrl-b + t # Show the current time
+Ctrl-b + d # Detach from a screen
+Ctrl-b + c # Create a new window
+Ctrl-b + , # Rename current window
+Ctrl-b + n/p/0/1/2/... # Next/Previous window, or go to window number directly
+Ctrl-b + w # Show all windows
+Ctrl-b + % # Split window vertically |
+Ctrl-b + &#8221; # Split window horizontally -
+Ctrl-b + o/up/down/left/right # Cycle through panes
+Ctrl-b + Space # Cycle through different layouts
+Ctrl-b + x # Kill pane or window
+Ctrl-b + ? # List all default keybindings</code></pre>
 
-<div id="listingParsingErrorBox" i18n-values=".innerHTML:listingParsingErrorBoxText"></div>
+<h2>NMAP</h2>
+Scan the fuck out of a single port:
+<pre><code class="bash">nmap -vvv -A --reason --script="+(safe or default) and not broadcast" -p 4567 192.168.1.1</code></pre>
 
-<span id="parentDirText" style="display:none" i18n-content="parentDirText"></span>
+<h2>GENERATE RANDOM STRING</h2>
+<pre><code class="bash">cat /dev/urandom | env LC_CTYPE=C tr -dc 'a-zA-Z0-9!@#$%^&*()_+-=[]{}\|;:",./<>?`~' | fold -w 32 | head -n 1</code></pre>
 
-<h1 id="header" i18n-content="header"></h1>
+<h2>SCP</h2>
+To copy a file from B to A while logged into B:
+<pre><code class="bash">scp /path/to/file username@a:/path/to/destination</code></pre>
+To copy a file from B to A while logged into A:
+<pre><code class="bash">scp username@b:/path/to/file /path/to/destination</code></pre>
 
-<table id="table">
-  <tr class="header">
-    <td i18n-content="headerName"></td>
-    <td class="detailsColumn" i18n-content="headerSize"></td>
-    <td class="detailsColumn" i18n-content="headerDateModified"></td>
-  </tr>
-</table>
+<h2>CHECK FILE/FOLDER SIZE</h2>
+<pre><code>du -sh
+du -sh /folder</code></pre>
+
+<h2>FIND BY FILENAME</h2>
+<pre><code>Find . -name test.java</code></pre>
+
+<h2>REGEX</h2>
+Remove all characters starting from "- " till the end of the line:<br>
+<pre><code>(?s) -.*?$</code></pre>
+
+<h2>VIM</h2>
+Toggle line numbers:<br>
+<pre><code>:set nu!</code></pre>
+
+<h2>ZIP</h2>
+Create an encrypted zip of a file or folder. You will be prompted for a password.<br>
+<pre><code>zip -e out.zip filename
+zip -er out.zip foldername
+</code></pre>
+
+<h2>EXTERNAL JS</h2>
+<p>Import an external javascript library in 32 characters. Might be able to strip more characters off if using IE.
+<pre><code class="html">&lt;script&#47;src=&#47;&#47;mu.gl&#47;c.j&gt;&lt;&#47;script</code></pre></p>
+
+<!-- JS will crash if line below not present on the page...
+<p>’</p>
+-->
 
 </body>
-
 </html>
-<script>var templateData = {"header":"Index of LOCATION","headerDateModified":"Date Modified","headerName":"Name","headerSize":"Size","listingParsingErrorBoxText":"Oh, no! This server is sending data Google Chrome can't understand. Please \u003Ca href=\"http://code.google.com/p/chromium/issues/entry\">report a bug\u003C/a>, and include the \u003Ca href=\"LOCATION\">raw listing\u003C/a>.","parentDirText":"[parent directory]","textdirection":"ltr"};</script><script>// Copyright (c) 2010 The Chromium Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-
-/**
- * NOTE: The use of this file is deprecated. Use i18n_template2.js instead.
- *
- * @fileoverview This is a simple template engine inspired by JsTemplates
- * optimized for i18n.
- *
- * It currently supports two handlers:
- *
- *   * i18n-content which sets the textContent of the element
- *
- *     <span i18n-content="myContent"></span>
- *     i18nTemplate.process(element, {'myContent': 'Content'});
- *
- *   * i18n-values is a list of attribute-value or property-value pairs.
- *     Properties are prefixed with a '.' and can contain nested properties.
- *
- *     <span i18n-values="title:myTitle;.style.fontSize:fontSize"></span>
- *     i18nTemplate.process(element, {
- *       'myTitle': 'Title',
- *       'fontSize': '13px'
- *     });
- */
-
-var i18nTemplate = (function() {
-  /**
-   * This provides the handlers for the templating engine. The key is used as
-   * the attribute name and the value is the function that gets called for every
-   * single node that has this attribute.
-   * @type {Object}
-   */
-  var handlers = {
-    /**
-     * This handler sets the textContent of the element.
-     */
-    'i18n-content': function(element, attributeValue, obj) {
-      element.textContent = obj[attributeValue];
-    },
-
-    /**
-     * This handler adds options to a select element.
-     */
-    'i18n-options': function(element, attributeValue, obj) {
-      var options = obj[attributeValue];
-      options.forEach(function(values) {
-        var option = typeof values == 'string' ? new Option(values) :
-            new Option(values[1], values[0]);
-        element.appendChild(option);
-      });
-    },
-
-    /**
-     * This is used to set HTML attributes and DOM properties,. The syntax is:
-     *   attributename:key;
-     *   .domProperty:key;
-     *   .nested.dom.property:key
-     */
-    'i18n-values': function(element, attributeValue, obj) {
-      var parts = attributeValue.replace(/\s/g, '').split(/;/);
-      for (var j = 0; j < parts.length; j++) {
-        var a = parts[j].match(/^([^:]+):(.+)$/);
-        if (a) {
-          var propName = a[1];
-          var propExpr = a[2];
-
-          // Ignore missing properties
-          if (propExpr in obj) {
-            var value = obj[propExpr];
-            if (propName.charAt(0) == '.') {
-              var path = propName.slice(1).split('.');
-              var object = element;
-              while (object && path.length > 1) {
-                object = object[path.shift()];
-              }
-              if (object) {
-                object[path] = value;
-                // In case we set innerHTML (ignoring others) we need to
-                // recursively check the content
-                if (path == 'innerHTML') {
-                  process(element, obj);
-                }
-              }
-            } else {
-              element.setAttribute(propName, value);
-            }
-          } else {
-            console.warn('i18n-values: Missing value for "' + propExpr + '"');
-          }
-        }
-      }
-    }
-  };
-
-  var attributeNames = [];
-  for (var key in handlers) {
-    attributeNames.push(key);
-  }
-  var selector = '[' + attributeNames.join('],[') + ']';
-
-  /**
-   * Processes a DOM tree with the {@code obj} map.
-   */
-  function process(node, obj) {
-    var elements = node.querySelectorAll(selector);
-    for (var element, i = 0; element = elements[i]; i++) {
-      for (var j = 0; j < attributeNames.length; j++) {
-        var name = attributeNames[j];
-        var att = element.getAttribute(name);
-        if (att != null) {
-          handlers[name](element, att, obj);
-        }
-      }
-    }
-  }
-
-  return {
-    process: process
-  };
-})();
-</script><script>// Copyright (c) 2010 The Chromium Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-
-// Invoke the template engine previously loaded from i18n_template.js
-i18nTemplate.process(document, templateData);
-</script><script>start("C:\\Users\\Mark\\Dropbox\\mugl-site\\");</script>
-<script>addRow("..","..",1,"0 B","2/24/14 3:34:28 AM");</script>
-<script>addRow(".git",".git",1,"0 B","2/24/14 3:33:39 AM");</script>
-<script>addRow("404.html","404.html",0,"772 B","11/7/13 7:06:47 PM");</script>
-<script>addRow("CNAME","CNAME",0,"6 B","11/7/13 7:05:15 PM");</script>
-<script>addRow("index.html","index.html",0,"10.9 kB","2/24/14 3:27:49 AM");</script>
-<script>addRow("readme.md","readme.md",0,"218 B","2/24/14 3:27:49 AM");</script>
-<script>addRow("DB_public_folder","https://www.dropbox.com/sh/1d6z6eppmqjn7mk/AACy3denGSrINz27etTpiEF9a?dl=0",1,"114 B","11/23/14 7:49:49 PM");</script>
